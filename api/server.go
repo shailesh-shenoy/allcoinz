@@ -7,7 +7,7 @@ type ApiServer struct {
 	mux        *http.ServeMux
 }
 
-func (s *ApiServer) Run() {
+func (s *ApiServer) Run() (err error) {
 	s.mux = http.NewServeMux()
 	s.mux.HandleFunc("GET /hello", func(w http.ResponseWriter, r *http.Request) {
 		// return hello world json response
@@ -15,6 +15,9 @@ func (s *ApiServer) Run() {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{"message": "Hello, mux world!"}`))
+
 	})
-	http.ListenAndServe(s.ListenAddr, s.mux)
+
+	return http.ListenAndServe(s.ListenAddr, s.mux)
+
 }
