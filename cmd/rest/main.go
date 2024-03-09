@@ -9,15 +9,18 @@ import (
 
 func main() {
 
-	s := api.ApiServer{
-		ListenAddr: ":8080",
-	}
-
 	dataStore := db.NewDataStore("user=postgres password=allcoinz dbname=postgres host=localhost sslmode=disable")
 
 	log.Print("Connecting to postgres ...")
 	if err := dataStore.Open(); err != nil {
 		log.Fatal(err)
+	}
+
+	userService := db.NewUserService(dataStore)
+
+	s := api.ApiServer{
+		ListenAddr:  ":8080",
+		UserService: userService,
 	}
 	log.Print("Starting API Server")
 	log.Fatal(s.Run())
