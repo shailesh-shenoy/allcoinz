@@ -2,7 +2,7 @@ package db
 
 import (
 	"context"
-	"fmt"
+	"database/sql"
 
 	"github.com/shailesh-shenoy/allcoinz/domain"
 )
@@ -18,12 +18,12 @@ func NewUserService(ds *DataStore) *UserService {
 }
 
 func (userService *UserService) CreateUser(ctx context.Context, user *domain.User) error {
-	if err := userService.ds.db.PingContext(ctx); err != nil {
+	tx, err := userService.ds.BeginTx(ctx, nil)
+	if err != nil {
 		return err
 	}
-	fmt.Println("Create user called in db")
-	fmt.Printf("Context: %+v", ctx)
-	return nil
+	defer tx.Rollback()
+
 }
 
 func (userService *UserService) FindUserById(ctx context.Context, id int) (*domain.User, error) {
@@ -45,5 +45,25 @@ func (userService *UserService) UpdateUser(ctx context.Context, id int, userUpda
 // TODO: Delete a user and all associated keys.
 // TODO: Returns a custom error if the user in context is not the user being deleted.
 func (userService *UserService) DeleteUser(ctx context.Context, id int) error {
+	return nil
+}
+
+func createUserInDb(ctx context.Context, tx *sql.Tx, user *domain.User) error {
+	result, err := tx.ExecContext(ctx, `
+		INSERT INTO users (
+			name
+		)
+		VALUES (?)
+	`,
+		user.Name,
+	)
+	if err != nil {
+		return err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return err
+	}
+	user.Id = int(id)
 	return nil
 }

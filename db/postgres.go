@@ -1,6 +1,7 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"embed"
 	"fmt"
@@ -41,6 +42,11 @@ func (ds *DataStore) Open() (err error) {
 	}
 
 	return nil
+}
+
+func (ds *DataStore) BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error) {
+	return ds.db.BeginTx(ctx, opts)
+
 }
 
 func (ds *DataStore) migrate() (err error) {
